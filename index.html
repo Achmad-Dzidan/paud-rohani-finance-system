@@ -210,22 +210,16 @@
     <script type="module">
         // Import fungsi yang dibutuhkan dari Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp, orderBy, query } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // KONFIGURASI FIREBASE ANDA (Ganti dengan data dari Firebase Console)
-        const firebaseConfig = {
-            apiKey: "AIzaSyAxFeMsnK5FjkUgyNGDHZS2ZXyiowLdLEA",
-            authDomain: "paud-rohani.firebaseapp.com",
-            projectId: "paud-rohani",
-            storageBucket: "paud-rohani.firebasestorage.app",
-            messagingSenderId: "1051220684882",
-            appId: "1:1051220684882:web:7d77a8367fa92b57c96f8b",
-            measurementId: "G-SQHBZ6ST71"
-            };
+        // 1. IMPORT CONFIG DARI FILE LUAR
+        // Pastikan pakai "./" yang artinya "di folder yang sama"
+        import { firebaseConfig } from './firebase-config.js'; 
 
-        // Initialize Firebase
+        // 2. GUNAKAN VARIABEL IMPORT TADI
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         // Variabel Status Mode (Login atau Register)
         let isLoginMode = true;

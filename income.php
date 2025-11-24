@@ -69,19 +69,14 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, serverTimestamp } 
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp, orderBy, query } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAxFeMsnK5FjkUgyNGDHZS2ZXyiowLdLEA",
-            authDomain: "paud-rohani.firebaseapp.com",
-            projectId: "paud-rohani",
-            storageBucket: "paud-rohani.firebasestorage.app",
-            messagingSenderId: "1051220684882",
-            appId: "1:1051220684882:web:7d77a8367fa92b57c96f8b",
-            measurementId: "G-SQHBZ6ST71"
-            };
+        // 1. IMPORT CONFIG DARI FILE LUAR
+        // Pastikan pakai "./" yang artinya "di folder yang sama"
+        import { firebaseConfig } from './firebase-config.js'; 
 
+        // 2. GUNAKAN VARIABEL IMPORT TADI
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
