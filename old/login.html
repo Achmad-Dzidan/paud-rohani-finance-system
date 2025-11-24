@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PAUD Finance Login</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="card">
+            <!-- Logo bulat -->
+            <div class="logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
+            </div>
+
+            <h2 class="title">PAUD Finance System</h2>
+            <p class="subtitle">School Administration Portal</p>
+
+            <!-- Input -->
+            <label class="label">Admin Password</label>
+            <input 
+                type="password" 
+                id="password" 
+                placeholder="Enter admin password"
+                class="input"
+            />
+
+            <p id="error" class="error"></p>
+
+            <!-- Button -->
+            <button class="btn" onclick="login()">Login</button>
+
+            <div class="footer-box">
+                Default password: <b>admin123</b>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function login() {
+            const pwd = document.getElementById("password").value;
+            const error = document.getElementById("error");
+
+            if (pwd === "admin123") {
+                window.location.href = "dashboard/dashboard.html";
+            } else {
+                error.textContent = "Incorrect password";
+            }
+        }
+    </script>
+
+</body>
+</html>

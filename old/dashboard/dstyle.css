@@ -1,0 +1,178 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f7f9fc;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid #e4e4e4;
+    position: fixed;
+    padding: 20px;
+}
+
+.logo {
+    margin: 0;
+    font-size: 22px;
+}
+
+.subtitle {
+    margin-top: -5px;
+    color: gray;
+    font-size: 13px;
+}
+
+.sidebar nav {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar nav a {
+    text-decoration: none;
+    padding: 12px;
+    color: #333;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.sidebar nav a.active,
+.sidebar nav a:hover {
+    background: #f1f5ff;
+    color: #2d57ff;
+}
+
+.logout-box {
+    position: absolute;
+    bottom: 20px;
+    width: 80%;
+}
+
+.logout {
+    color: #ff5757;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+/* MAIN AREA */
+.main {
+    margin-left: 250px;
+    padding: 30px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.header p {
+    margin-top: 5px;
+    color: gray;
+}
+
+/* TOTAL PROFIT */
+.total-profit {
+    margin-top: 30px;
+}
+
+.profit-card {
+    padding: 25px;
+    background: linear-gradient(to right, #1e40ff, #0d72ff);
+    color: white;
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.icon-box {
+    background: rgba(255,255,255,0.2);
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 28px;
+}
+
+/* DAILY INCOME */
+.widget {
+    margin-top: 25px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+}
+
+.chart-placeholder {
+    margin-top: 20px;
+    height: 200px;
+    background: #eef2ff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7cff;
+    font-weight: bold;
+}
+
+/* BOTTOM GRID */
+.bottom-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.card {
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+}
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    background: #2d57ff;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.name {
+    margin: 0;
+    font-size: 14px;
+}
+
+.date {
+    margin: 0;
+    font-size: 12px;
+    color: gray;
+}
+
+.value {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+.empty {
+    color: gray;
+    text-align: center;
+    margin-top: 20px;
+}

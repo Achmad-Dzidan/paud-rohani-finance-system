@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAUD Finance Dashboard</title>
+    <link rel="stylesheet" href="dstyle.css">
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2 class="logo">PAUD Finance</h2>
+        <p class="subtitle">Admin Portal</p>
+
+        <nav>
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">Income Management</a>
+            <a href="#">User Management</a>
+        </nav>
+
+        <div class="logout-box">
+            <a href="#" class="logout">Logout</a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+        
+        <div class="header">
+            <h1>Dashboard</h1>
+            <p>Overview of school finance</p>
+        </div>
+
+        <!-- TOTAL PROFIT -->
+        <section class="total-profit">
+            <div class="profit-card">
+                <div class="profit-info">
+                    <p class="label">Total Profit</p>
+                    <h2 class="amount">Rp 600</h2>
+                    <p class="sub">100% from last week</p>
+                </div>
+
+                <div class="icon-box">
+                    💰
+                </div>
+            </div>
+        </section>
+
+        <!-- DAILY INCOME -->
+        <section class="widget">
+            <h3>Daily Income (Last 30 Days)</h3>
+            <div class="chart-placeholder">
+                Chart Here (Coming Soon)
+            </div>
+        </section>
+
+        <!-- BOTTOM GRID -->
+        <section class="bottom-grid">
+
+            <!-- Recent Income -->
+            <div class="card">
+                <h3>Recent Income</h3>
+                <div class="recent-list">
+
+                    <div class="user-item">
+                        <div class="avatar">AF</div>
+                        <div>
+                            <p class="name">Achmad Dzidan Firdaus</p>
+                            <p class="date">Nov 21, 2025</p>
+                        </div>
+                        <p class="value">+Rp 200</p>
+                    </div>
+
+                    <div class="user-item">
+                        <div class="avatar">AR</div>
+                        <div>
+                            <p class="name">Arkan</p>
+                            <p class="date">Nov 21, 2025</p>
+                        </div>
+                        <p class="value">+Rp 200</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Users Without Income -->
+            <div class="card">
+                <h3>Users Without Income</h3>
+                <p class="empty">All users have income records</p>
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

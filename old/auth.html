@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PAUD Finance - Login</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="center-page">
+    <div class="card">
+      <div class="icon-circle">
+        <!-- simple icon -->
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="1.6">
+          <path d="M12 2L3 7v7a2 2 0 0 0 2 2h2v-5h6v5h2a2 2 0 0 0 2-2V7z" />
+        </svg>
+      </div>
+      <h1>PAUD Finance System</h1>
+      <p class="muted">School Administration Portal</p>
+
+      <div id="message" class="message"></div>
+
+      <!-- LOGIN FORM -->
+      <div id="login-area">
+        <label>Admin / User Email</label>
+        <input id="email" type="email" placeholder="admin@paud.com" />
+        <label>Admin Password</label>
+        <input id="password" type="password" placeholder="Enter password" />
+        <button id="btnLogin" class="btn primary">Login</button>
+        <div class="small muted">Belum punya akun? <a id="show-register" href="#">Register</a></div>
+      </div>
+
+      <!-- REGISTER FORM (hidden by default) -->
+      <div id="register-area" style="display:none;">
+        <label>Full Name</label>
+        <input id="reg-name" type="text" placeholder="Nama lengkap" />
+        <label>Email</label>
+        <input id="reg-email" type="email" placeholder="user@example.com" />
+        <label>Password</label>
+        <input id="reg-password" type="password" placeholder="Minimal 6 karakter" />
+        <button id="btnRegister" class="btn">Create Account</button>
+        <div class="small muted">Sudah punya akun? <a id="show-login" href="#">Login</a></div>
+      </div>
+
+      <div class="notes muted small">
+        Default admin dapat dibuat via Firebase Console (set role = "admin" pada dokumen user di collection "users").
+      </div>
+    </div>
+  </main>
+
+  <!-- Firebase config and app scripts -->
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import {
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import {
+      doc, setDoc, getDoc
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    // UI refs
+    const emailEl = document.getElementById('email');
+    const passwordEl = document.getElementById('password');
+    const btnLogin = document.getElementById('btnLogin');
+    const messageEl = document.getElementById('message');
+
+    const showRegisterLink = document.getElementById('show-register');
+    const showLoginLink = document.getElementById('show-login');
+    const loginArea = document.getElementById('login-area');
+    const registerArea = document.getElementById('register-area');
+
+    const regName = document.getElementById('reg-name');
+    const regEmail = document.getElementById('reg-email');
+    const regPassword = document.getElementById('reg-password');
+    const btnRegister = document.getElementById('btnRegister');
+
+    function showMessage(text, isError = false) {
+      messageEl.textContent = text;
+      messageEl.style.color = isError ? '#c53030' : '#065f46';
+      setTimeout(()=> messageEl.textContent = '', 5000);
+    }
+
+    showRegisterLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginArea.style.display = 'none';
+      registerArea.style.display = 'block';
+    });
+    showLoginLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginArea.style.display = 'block';
+      registerArea.style.display = 'none';
+    });
+
+    // REGISTER
+    btnRegister.addEventListener('click', async () => {
+      const name = regName.value.trim();
+      const email = regEmail.value.trim();
+      const pass = regPassword.value;
+
+      if (!name || !email || pass.length < 6) {
+        showMessage('Isi semua field dan gunakan password minimal 6 karakter', true);
+        return;
+      }
+
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        const uid = cred.user.uid;
+        // Create a user profile doc in Firestore with role = 'user' by default
+        await setDoc(doc(db, 'users', uid), {
+          name,
+          email,
+          role: 'user',      // default role
+          createdAt: new Date().toISOString()
+        });
+        showMessage('Akun berhasil dibuat. Silakan login.');
+        // switch to login form
+        loginArea.style.display = 'block';
+        registerArea.style.display = 'none';
+      } catch (err) {
+        console.error(err);
+        showMessage('Gagal register: ' + err.message, true);
+      }
+    });
+
+    // LOGIN
+    btnLogin.addEventListener('click', async () => {
+      const email = emailEl.value.trim();
+      const pass = passwordEl.value;
+      if (!email || !pass) return showMessage('Masukkan email dan password', true);
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, pass);
+        // after sign-in, onAuthStateChanged will run and redirect
+      } catch (err) {
+        console.error(err);
+        showMessage('Login gagal: ' + err.message, true);
+      }
+    });
+
+    // On auth state change: read Firestore user profile to get role
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return; // not logged in
+      try {
+        const docRef = doc(db, 'users', user.uid);
+        const snap = await getDoc(docRef);
+        if (!snap.exists()) {
+          // If profile missing, create default user doc
+          await setDoc(docRef, { name: user.email, email: user.email, role: 'user', createdAt: new Date().toISOString() });
+          window.location.href = 'dashboard.html?role=user';
+          return;
+        }
+        const data = snap.data();
+        const role = data.role || 'user';
+        // redirect berdasarkan role
+        if (role === 'admin') {
+          window.location.href = '<dashboard>dashboard.html?role=admin';
+        } else {
+          window.location.href = '<dashboard>dashboard.html?role=user';
+        }
+      } catch (err) {
+        console.error('Error reading user profile', err);
+        showMessage('Terjadi kesalahan saat membaca profil', true);
+      }
+    });
+  </script>
+</body>
+</html>
