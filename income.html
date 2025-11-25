@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAUD Finance - Income Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <button class="sidebar-close-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="brand">
+            <h2>PAUD Finance</h2>
+            <p>Admin Portal</p>
+        </div>
+        <ul class="menu-list">
+            <li><a href="dashboard.html" class="menu-item"><i class="fa-solid fa-border-all"></i> Dashboard</a></li>
+            <li><a href="income.html" class="menu-item active"><i class="fa-solid fa-dollar-sign"></i> Income Management</a></li>
+            <li><a href="users.html" class="menu-item"><i class="fa-solid fa-user-group"></i> User Management</a></li>
+        </ul>
+        <a href="index.html" class="menu-item logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="centered-header">
+            <div class="page-title-wrapper" style="display:flex; align-items:center; margin-bottom: 8px;">
+                <button class="mobile-toggle-btn" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div>
+                    <h1>Income Management</h1>
+                    <p>Add or subtract income for users</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="toggle-container">
+                <button class="toggle-btn active-income" id="btnIncome" onclick="setTransactionType('income')">
+                    <i class="fa-solid fa-plus"></i> Add Income
+                </button>
+                <button class="toggle-btn" id="btnExpense" onclick="setTransactionType('expense')">
+                    <i class="fa-solid fa-minus"></i> Subtract Income
+                </button>
+            </div>
+
+            <form id="transactionForm">
+                <div class="form-group">
+                    <label class="form-label">Select User *</label>
+                    <select id="userSelect" class="form-control" required>
+                        <option value="" disabled selected>Choose a user</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount (Rp) *</label>
+                    <input type="number" id="amountInput" class="form-control" placeholder="Enter amount" required min="1">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date *</label>
+                    <input type="date" id="dateInput" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Notes (Optional)</label>
+                    <textarea id="noteInput" class="form-control" placeholder="Add any notes about this transaction"></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">Add Income</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Overlay -->
+    <div id="confirmOverlay" class="confirm-overlay hidden"></div>
+
+    <div id="confirmationPopup" class="popup-overlay">
+        <div class="popup-box">
+            <h3>Confirm Income Addition</h3>
+            <p>Please review the transaction details:</p>
+            <div class="popup-details">
+                <p><strong>User:</strong> <span id="popupUser"></span></p>
+                <p><strong>Amount:</strong> Rp <span id="popupAmount"></span></p>
+                <p><strong>Date:</strong> <span id="popupDate"></span></p>
+                <p><strong>Operation:</strong> <span id="popupType"></span></p>
+            </div>
+
+            <div class="popup-actions">
+                <button id="cancelBtn" class="cancel-btn">Cancel</button>
+                <button id="confirmBtn" class="confirm-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="global-alert-container" class="alert-container"></div>
+
+    <!-- <div class="footer-badge"><i class="fa-solid fa-bolt"></i> Made with Emergent</div> -->
+
+    <script src="js/alerts.js"></script>
+
+    <script>
+        loadPendingAlert(); // tampilkan notifikasi jika sebelumnya ada
+    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp, orderBy, query, getDocs } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // 1. IMPORT CONFIG DARI FILE LUAR
+        // Pastikan pakai "./" yang artinya "di folder yang sama"
+        import { firebaseConfig } from './firebase-config.js'; 
+
+        // 2. GUNAKAN VARIABEL IMPORT TADI
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const userSelect = document.getElementById('userSelect');
+        const transactionForm = document.getElementById('transactionForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const dateInput = document.getElementById('dateInput');
+        let currentType = 'income';
+
+        dateInput.valueAsDate = new Date();
+
+        async function loadUsers() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                querySnapshot.forEach((doc) => {
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.text = doc.data().name;
+                    userSelect.appendChild(option);
+                });
+            } catch (e) { console.error(e); }
+        }
+        loadUsers();
+
+        transactionForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            // ambil data form
+            const selectedUser = userSelect.options[userSelect.selectedIndex].text;
+            const amountValue = document.getElementById("amountInput").value;
+            const dateValue = dateInput.value;
+            const noteValue = document.getElementById("noteInput").value;
+
+            // isi pop up
+            document.getElementById("popupUser").innerText = selectedUser;
+            document.getElementById("popupAmount").innerText = amountValue;
+            document.getElementById("popupDate").innerText = dateValue;
+            document.getElementById("popupType").innerText = currentType === "income" ? "Add" : "Subtract";
+
+            // tampilkan pop up
+            document.getElementById("confirmationPopup").style.display = "flex";
+        });
+
+        document.getElementById("confirmBtn").addEventListener("click", async () => {
+            confirmBtn.disabled = true;
+            confirmBtn.innerText = "Processing...";
+
+            try {
+                await addDoc(collection(db, "transactions"), {
+                    userId: userSelect.value,
+                    userName: userSelect.options[userSelect.selectedIndex].text,
+                    amount: parseInt(document.getElementById('amountInput').value),
+                    date: dateInput.value,
+                    note: document.getElementById('noteInput').value,
+                    type: currentType,
+                    createdAt: serverTimestamp()
+                });
+
+                document.getElementById("confirmationPopup").style.display = "none";
+                alert("Success!");
+
+                transactionForm.reset();
+                dateInput.valueAsDate = new Date();
+
+            } catch (error) {
+                alert("Error: " + error.message);
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerText = "Confirm";
+            }
+        });
+
+        // Cancel tombol
+        document.getElementById("cancelBtn").addEventListener("click", () => {
+            document.getElementById("confirmationPopup").style.display = "none";
+        });
+
+
+
+        window.setTransactionType = (type) => {
+            currentType = type;
+            const btnIncome = document.getElementById('btnIncome');
+            const btnExpense = document.getElementById('btnExpense');
+
+            if (type === 'income') {
+                btnIncome.className = 'toggle-btn active-income';
+                btnExpense.className = 'toggle-btn';
+                submitBtn.innerText = "Add Income";
+                submitBtn.style.backgroundColor = "var(--success-green)";
+            } else {
+                btnIncome.className = 'toggle-btn';
+                btnExpense.className = 'toggle-btn active-expense';
+                submitBtn.innerText = "Subtract Income";
+                submitBtn.style.backgroundColor = "var(--danger-red)";
+            }
+        }
+
+        // SHOW POPUP
+        function showConfirm(user, amount, date, type, onConfirm) {
+            document.getElementById("confirmUser").innerText = user;
+            document.getElementById("confirmAmount").innerText = amount;
+            document.getElementById("confirmDate").innerText = date;
+            document.getElementById("confirmType").innerText = type;
+
+            document.getElementById("confirmOverlay").classList.remove("hidden");
+            document.getElementById("confirmModal").classList.remove("hidden");
+
+            // Tombol CANCEL
+            document.getElementById("cancelBtn").onclick = function () {
+                hideConfirm();
+            };
+
+            // Tombol CONFIRM
+            document.getElementById("confirmBtn").onclick = function () {
+                hideConfirm();
+                onConfirm(); // menjalankan fungsi asli
+            };
+        }
+
+        // HIDE POPUP
+        function hideConfirm() {
+            document.getElementById("confirmOverlay").classList.add("hidden");
+            document.getElementById("confirmModal").classList.add("hidden");
+        }
+    </script>
+
+    <script>
+    function showAlert(message, type = "success") {
+        const container = document.getElementById("alertContainer");
+
+        // Popup Element
+        const div = document.createElement("div");
+        div.classList.add("alert-box");
+        div.classList.add(type === "success" ? "alert-success" : "alert-error");
+
+        div.innerHTML = `
+            <i>${type === "success" ? "✔️" : "❌"}</i>
+            <span>${message}</span>
+        `;
+
+        container.appendChild(div);
+
+        // Smooth slide in
+        setTimeout(() => {
+            div.style.opacity = "1";
+            div.style.transform = "translateX(0)";
+        }, 50);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            div.style.opacity = "0";
+            div.style.transform = "translateX(120%)";
+
+            // Remove after animation
+            setTimeout(() => div.remove(), 400);
+        }, 5000);
+    }
+    </script>
+
+
+</body>
+</html>
